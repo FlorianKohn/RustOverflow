@@ -2,9 +2,12 @@
 # Created by https://www.toptal.com/developers/gitignore/api/clion,rust,windows
 # Edit at https://www.toptal.com/developers/gitignore?templates=clion,rust,windows
 
+rust_overflow.db3
+
 ### CLion ###
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm and Rider
 # Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
+.idea/*
 
 # User-specific stuff
 .idea/**/workspace.xml
