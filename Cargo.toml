@@ -7,8 +7,9 @@ authors = ["Florian Kohn"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-rocket = "0.5.0-rc.1"
+rocket = { version = "0.5.0-rc.1", features = ["secrets"]}
 diesel = { version = "1.4.8", features = ["sqlite"] }
+bcrypt = "0.10.1"
 
 [dependencies.rocket_sync_db_pools]
 version = "0.1.0-rc.1"
