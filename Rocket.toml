@@ -1,2 +1,5 @@
+[default]
+sass_sheet_path = "scss/main.scss"
+
 [global.databases]
 rust_overflow = { url = "rust_overflow.db3" }

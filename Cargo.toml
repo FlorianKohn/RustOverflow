@@ -8,10 +8,17 @@ authors = ["Florian Kohn"]
 
 [dependencies]
 rocket = { version = "0.5.0-rc.1", features = ["secrets"]}
+rocket-sass-fairing = "0.1.1"
 diesel = { version = "1.4.8", features = ["sqlite"] }
 bcrypt = "0.10.1"
+serde = {version = "1.0.136", features = ["derive"]}
+serde_json = "1.0"
 
 [dependencies.rocket_sync_db_pools]
 version = "0.1.0-rc.1"
 default-features = false
 features = ["diesel_sqlite_pool"]
+
+[dependencies.rocket_dyn_templates]
+version = "0.1.0-rc.1"
+features = ["handlebars"]

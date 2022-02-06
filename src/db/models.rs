@@ -1,6 +1,7 @@
 use crate::db::schema::{answers, questions, users};
 use bcrypt::hash;
 use std::time::SystemTime;
+use serde::{Serialize, Deserialize};
 
 #[derive(Queryable, Debug, Clone)]
 pub(crate) struct User {
@@ -8,6 +9,21 @@ pub(crate) struct User {
     pub(crate) username: String,
     pub(crate) password: String,
 }
+
+// A logged in user
+#[derive(Queryable, Serialize, Deserialize, Debug, Clone)]
+pub(crate) struct Login {
+    pub(crate) id: i32,
+    pub(crate) username: String,
+}
+ impl From<User> for Login {
+     fn from(u: User) -> Self {
+         Login{
+             id: u.id,
+             username: u.username
+         }
+     }
+ }
 
 #[derive(Queryable, Debug, Clone)]
 pub(crate) struct Tag {
