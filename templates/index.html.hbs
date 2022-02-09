@@ -7,8 +7,18 @@
 
     <!-- Bootstrap CSS -->
     <link href="/bootstrap.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
 
     <title>Rust Overflow</title>
+
+    <style>
+        .clamp {
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+    </style>
 </head>
 <body>
 <div class=".container-lg">
@@ -24,6 +34,9 @@
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item">
                     <a class="nav-link active" aria-current="page" href="#">Questions</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" aria-current="page" href="#">Tags</a>
                 </li>
             </ul>
             {{#if user}}
@@ -102,8 +115,45 @@
 
 <div class="container-lg row mx-auto p-0">
     <div class="col-lg-1"></div>
-    <div class="col bg-light p-lg-2" style="height: 3000px">
-        <h1>Newest Questions</h1>
+    <div class="col bg-light d-flex flex-column justify-content-start align-items-stretch p-0 border-start border-bottom border-dark">
+        <h1 class="my-4 ms-4">Newest Questions</h1>
+        <div class="ms-4 mb-2 lead">19827398 Question here</div>
+        <div class="border-top border-dark row py-3 m-0">
+            <div class="col-2 text-end d-flex flex-column justify-content-start align-items-end">
+                <div>25 votes</div>
+                <div class="border border-success rounded px-2 mt-1 text-success">5 answers</div>
+            </div>
+            <div class="col d-flex flex-column justify-content-start align-items-stretch">
+                <a class="text-decoration-none fs-4 mb-1" href="#">This is the Question Title</a>
+                <div class="clamp">This is the beginning of the question text. It is very long and should be truncated at two lines. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</div>
+                <div class="d-flex flex-row justify-content-start flex-wrap mt-3">
+                    <a class="btn btn-info text-light me-2">Tag 1</a>
+                    <a class="btn btn-info text-light me-2">Tag 2</a>
+                    <a class="btn btn-info text-light me-2">Tag 3</a>
+                    <a class="btn btn-info text-light me-2">Tag 4</a>
+                    <div class="ms-auto flex-shrink-0 d-flex flex-column justify-content-center">
+                        <div><strong>Username Here</strong> asked <em>5o min</em> ago</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="border-top border-dark row py-3 m-0">
+            <div class="col-2 text-end d-flex flex-column justify-content-start align-items-end">
+                <div>25 votes</div>
+                <div class="border border-success rounded px-2 mt-1 text-light bg-success"><i class="bi-check-circle me-2"></i>5 answers</div>
+            </div>
+            <div class="col d-flex flex-column justify-content-start align-items-stretch">
+                <a class="text-decoration-none fs-4 mb-1" href="#">This is the Question Title which is answered already</a>
+                <div class="clamp">This is the beginning of the question text. It is very long and should be truncated at two lines. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</div>
+                <div class="d-flex flex-row justify-content-start flex-wrap mt-3">
+                    <a class="btn btn-info text-light me-2">Tag 1</a>
+                    <a class="btn btn-info text-light me-2">Tag 2</a>
+                    <div class="ms-auto flex-shrink-0 d-flex flex-column justify-content-center">
+                        <div><strong>A really long Username</strong> asked <em>5o min</em> ago</div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     <div class="col-lg-1"></div>
 </div>
