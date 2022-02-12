@@ -5,5 +5,6 @@ create table tags
         primary key autoincrement
         unique,
     name CHAR(256) not null
-        unique
+        unique,
+    description VARCHAR not null
 );

@@ -9,10 +9,12 @@ authors = ["Florian Kohn"]
 [dependencies]
 rocket = { version = "0.5.0-rc.1", features = ["secrets"]}
 rocket-sass-fairing = "0.1.1"
-diesel = { version = "1.4.8", features = ["sqlite"] }
+diesel = { version = "1.4.8", features = ["sqlite", "chrono"] }
 bcrypt = "0.10.1"
 serde = {version = "1.0.136", features = ["derive"]}
 serde_json = "1.0"
+chrono = {version="0.4.19", features = ["serde"]}
+chrono-humanize = "0.2.1"
 
 [dependencies.rocket_sync_db_pools]
 version = "0.1.0-rc.1"

@@ -1,7 +1,7 @@
 use crate::db::schema::{answers, questions, users};
 use bcrypt::hash;
-use std::time::SystemTime;
-use serde::{Serialize, Deserialize};
+use chrono::NaiveDateTime;
+use serde::{Deserialize, Serialize};
 
 #[derive(Queryable, Debug, Clone)]
 pub(crate) struct User {
@@ -16,37 +16,51 @@ pub(crate) struct Login {
     pub(crate) id: i32,
     pub(crate) username: String,
 }
- impl From<User> for Login {
-     fn from(u: User) -> Self {
-         Login{
-             id: u.id,
-             username: u.username
-         }
-     }
- }
+impl From<User> for Login {
+    fn from(u: User) -> Self {
+        Login {
+            id: u.id,
+            username: u.username,
+        }
+    }
+}
 
-#[derive(Queryable, Debug, Clone)]
+#[derive(Queryable, Serialize, Debug, Clone)]
 pub(crate) struct Tag {
     pub(crate) id: i32,
     pub(crate) name: String,
+    pub(crate) description: String,
 }
 
-#[derive(Queryable, Debug, Clone)]
+#[derive(Queryable, Serialize, Debug, Clone)]
 pub(crate) struct Question {
     pub(crate) id: i32,
-    pub(crate) author: i32,
-    pub(crate) time: SystemTime,
+    pub(crate) author: String,
+    pub(crate) time: NaiveDateTime,
     pub(crate) score: i32,
     pub(crate) title: String,
     pub(crate) text: String,
 }
 
+#[derive(Serialize, Debug, Clone)]
+pub(crate) struct DisplayQuestion {
+    pub(crate) id: i32,
+    pub(crate) author: String,
+    pub(crate) time: NaiveDateTime,
+    pub(crate) score: i32,
+    pub(crate) title: String,
+    pub(crate) text: String,
+    pub(crate) tags: Vec<Tag>,
+    pub(crate) num_answers: i64,
+    pub(crate) answered: bool,
+}
+
 #[derive(Queryable, Debug, Clone)]
 pub(crate) struct Answer {
     pub(crate) id: i32,
-    pub(crate) author: i32,
+    pub(crate) author: String,
     pub(crate) question: i32,
-    pub(crate) time: SystemTime,
+    pub(crate) time: NaiveDateTime,
     pub(crate) score: i32,
     pub(crate) accepted: bool,
     pub(crate) text: String,
