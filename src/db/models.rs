@@ -55,7 +55,7 @@ pub(crate) struct DisplayQuestion {
     pub(crate) answered: bool,
 }
 
-#[derive(Queryable, Debug, Clone)]
+#[derive(Queryable, Serialize, Debug, Clone)]
 pub(crate) struct Answer {
     pub(crate) id: i32,
     pub(crate) author: String,

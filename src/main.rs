@@ -1,6 +1,6 @@
+mod backend;
 mod db;
 mod frontend;
-mod backend;
 
 #[macro_use]
 extern crate rocket;
@@ -13,8 +13,8 @@ use rocket::fs::{relative, FileServer};
 use rocket_dyn_templates::handlebars::{
     Context, Handlebars, Helper, HelperResult, Output, RenderContext,
 };
-use rocket_sass_fairing::SassSheet;
 use rocket_dyn_templates::Template;
+use rocket_sass_fairing::SassSheet;
 
 #[get("/bootstrap.css")]
 async fn style(sheet: &SassSheet) -> &SassSheet {
@@ -46,7 +46,16 @@ fn rocket() -> _ {
         .mount("/static", FileServer::from(relative!("static")).rank(3))
         .mount(
             "/",
-            routes![frontend::index, frontend::tagged_question, backend::login, backend::register, backend::logout, backend::ask_question, style],
+            routes![
+                frontend::index,
+                frontend::tagged_question,
+                frontend::thread,
+                backend::login,
+                backend::register,
+                backend::logout,
+                backend::ask_question,
+                style
+            ],
         )
         .attach(DbConn::fairing())
         .attach(Template::custom(|engines| {

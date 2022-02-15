@@ -1,8 +1,8 @@
-use rocket_dyn_templates::Template;
-use serde::Serialize;
-use crate::db::models::{Tag, DisplayQuestion, Login};
+use crate::db::models::{Answer, DisplayQuestion, Login, Tag};
 use crate::db::DbConn;
 use rocket::http::Status;
+use rocket_dyn_templates::Template;
+use serde::Serialize;
 
 #[derive(Debug, Clone, Serialize)]
 struct QuestionsCtx {
@@ -39,9 +39,13 @@ pub(crate) async fn index(user: Option<Login>, conn: DbConn) -> Result<Template,
 }
 
 #[get("/t/<tags>")]
-pub(crate) async fn tagged_question(user: Option<Login>, conn: DbConn, tags: String) -> Result<Template, (Status, String)> {
-    let tag_names:Vec<String> = tags.split("+").map(String::from).collect();
-    let tags= conn.tags_with_names(tag_names.clone()).await?;
+pub(crate) async fn tagged_question(
+    user: Option<Login>,
+    conn: DbConn,
+    tags: String,
+) -> Result<Template, (Status, String)> {
+    let tag_names: Vec<String> = tags.split("+").map(String::from).collect();
+    let tags = conn.tags_with_names(tag_names.clone()).await?;
     let questions = conn.questions_with_tag(tag_names.clone()).await?;
     Ok(Template::render(
         "questions",
@@ -56,6 +60,34 @@ pub(crate) async fn tagged_question(user: Option<Login>, conn: DbConn, tags: Str
 
             num_questions: questions.len(),
             questions: questions,
+        },
+    ))
+}
+
+#[derive(Debug, Clone, Serialize)]
+struct ThreadCtx {
+    user: Option<String>,
+
+    question: DisplayQuestion,
+    num_answers: usize,
+    answers: Vec<Answer>,
+}
+
+#[get("/q/<id>")]
+pub(crate) async fn thread(
+    user: Option<Login>,
+    conn: DbConn,
+    id: i32,
+) -> Result<Template, (Status, String)> {
+    let question = conn.question(id).await?;
+    let answers = conn.answers(id).await?;
+    Ok(Template::render(
+        "thread",
+        ThreadCtx {
+            user: user.map(|u| u.username),
+            question,
+            num_answers: answers.len(),
+            answers,
         },
     ))
 }

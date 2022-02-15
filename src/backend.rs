@@ -1,11 +1,11 @@
-use rocket::request::{FromRequest, Outcome};
 use crate::db::models::Login;
-use rocket::Request;
-use rocket::outcome::IntoOutcome;
 use crate::db::DbConn;
-use rocket::http::{CookieJar, Status, Cookie};
 use rocket::form::Form;
+use rocket::http::{Cookie, CookieJar, Status};
+use rocket::outcome::IntoOutcome;
+use rocket::request::{FromRequest, Outcome};
 use rocket::response::Redirect;
+use rocket::Request;
 
 #[rocket::async_trait]
 impl<'r> FromRequest<'r> for Login {
@@ -82,7 +82,11 @@ pub(crate) async fn ask_question(
     question: Form<AskForm>,
     user: Login,
 ) -> Result<Redirect, (Status, String)> {
-    let AskForm{ title, question, tags } = question.into_inner();
+    let AskForm {
+        title,
+        question,
+        tags,
+    } = question.into_inner();
     conn.new_question(user.id, title, question, tags).await?;
     Ok(Redirect::to("/"))
 }

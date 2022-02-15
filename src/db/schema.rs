@@ -176,10 +176,4 @@ joinable!(chosen_tags -> questions (question));
 joinable!(chosen_tags -> tags (tag));
 joinable!(questions -> users (author));
 
-allow_tables_to_appear_in_same_query!(
-    answers,
-    chosen_tags,
-    questions,
-    tags,
-    users,
-);
+allow_tables_to_appear_in_same_query!(answers, chosen_tags, questions, tags, users,);
