@@ -1,0 +1,72 @@
+{{#*inline "page"}}
+
+<div class="col bg-light d-flex flex-column justify-content-start align-items-stretch p-0 border-start border-bottom border-dark">
+    <h1 class="my-4 ms-4">{{title}}</h1>
+    <p class="mx-4 lead">{{description}}</p>
+    <div class="mx-4 mb-3 d-flex flex-row justify-content-start flex-wrap gap-2">
+        <div class="d-flex flex-column justify-content-center">
+            <div class="text-muted">{{num_questions}} Questions here</div>
+        </div>
+        <button class="btn btn-primary ms-auto flex-shrink-0 {{#unless user}}disabled{{/unless}}" data-bs-toggle="modal" data-bs-target="#askModal">Ask new Question</button>
+    </div>
+    <div class="modal fade" id="askModal" tabindex="-1" aria-labelledby="ask question form" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="loginModalLabel">Ask a question</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="post" action="/ask">
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Title</label>
+                            <input type="text" class="form-control" id="title" name="title" aria-describedby="question title" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="question" class="form-label">Question</label>
+                            <textarea class="form-control" id="question" name="question" rows="7"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="tags" class="form-label">Choose Tags</label>
+                            <select class="selectpicker form-control" multiple data-live-search="true" title="tags" id="tags" name="tags">
+                                {{#each all_tags}}
+                                    <option value="{{this.id}}">{{this.name}}</option>
+                                {{/each}}
+                            </select>
+
+                        </div>
+                        <button type="submit" class="btn btn-primary float-end">Ask</button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    {{#each questions}}
+        <div class="border-top border-dark row py-3 m-0">
+            <div class="col-2 text-end d-flex flex-column justify-content-start align-items-end">
+                <div>{{this.score}} Votes</div>
+                {{#if this.answered}}
+                    <div class="border border-success rounded px-2 mt-1 text-light bg-success"><i class="bi-check-circle me-2"></i>{{this.num_answers}} answers</div>
+                {{else}}
+                    <div class="border border-success rounded px-2 mt-1 text-success">{{this.num_answers}} answers</div>
+                {{/if}}
+            </div>
+            <div class="col d-flex flex-column justify-content-start align-items-stretch">
+                <a class="text-decoration-none fs-4 mb-1" href="/q/{{this.id}}">{{this.title}}</a>
+                <div class="clamp">{{this.text}}</div>
+                <div class="d-flex flex-row justify-content-start flex-wrap mt-3 gap-2">
+                    {{#each this.tags}}
+                        <a class="btn btn-info text-light" href="/t/{{this.name}}">{{this.name}}</a>
+                    {{/each}}
+                    <div class="ms-auto flex-shrink-0 d-flex flex-column justify-content-center">
+                        <div><strong>{{this.author}}</strong> asked <em>{{to_duration this.time}}</em></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {{/each}}
+</div>
+{{/inline}}
+
+{{> layout}}
