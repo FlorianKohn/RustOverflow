@@ -28,6 +28,9 @@
                     <a class="bi bi-caret-up-fill text-muted display-6" href="/upvote/a/{{this.id}}"></a>
                     <div class="fs-4">{{this.score}}</div>
                     <a class="bi bi-caret-down-fill text-muted display-6" href="/downvote/a/{{this.id}}"></a>
+                    {{#if ../owner}}
+                        <a class="btn btn-outline-success" href="/solved/{{this.id}}">Solved</a>
+                    {{/if}}
                 </div>
                 <div class="col d-flex flex-column justify-content-start align-items-stretch pe-5">
                     <p>
@@ -39,6 +42,17 @@
                 </div>
             </div>
         {{/each}}
+        {{#if user}}
+            <h3 class="border-top border-dark m-0 py-3 px-4">Post an Answer</h3>
+            <form class="px-4" method="post" action="/answer">
+                <input type="hidden" name="question" value="{{question.id}}">
+                <div class="mb-3">
+                    <label for="text" class="form-label">Your Answer</label>
+                    <textarea class="form-control" id="text" name="text" rows="7"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary float-end mb-3">Answer</button>
+            </form>
+        {{/if}}
     </div>
 {{/inline}}
 

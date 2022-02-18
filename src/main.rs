@@ -13,7 +13,7 @@ use rocket::fs::{relative, FileServer};
 use rocket_dyn_templates::handlebars::{
     Context, Handlebars, Helper, HelperResult, Output, RenderContext,
 };
-use rocket_dyn_templates::Template;
+use rocket_dyn_templates::{Template, Engines};
 use rocket_sass_fairing::SassSheet;
 
 #[get("/bootstrap.css")]
@@ -54,14 +54,13 @@ fn rocket() -> _ {
                 backend::register,
                 backend::logout,
                 backend::ask_question,
+                backend::answer_question,
                 style
             ],
         )
         .attach(DbConn::fairing())
-        .attach(Template::custom(|engines| {
-            engines
-                .handlebars
-                .register_helper("to_duration", Box::new(datetime_helper));
+        .attach(Template::custom(|engines: &mut Engines| {
+            engines.handlebars.register_helper("to_duration", Box::new(datetime_helper));
         }))
         .attach(SassSheet::fairing())
 }

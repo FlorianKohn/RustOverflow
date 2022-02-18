@@ -67,8 +67,10 @@ pub(crate) async fn tagged_question(
 #[derive(Debug, Clone, Serialize)]
 struct ThreadCtx {
     user: Option<String>,
+    owner: bool,
 
     question: DisplayQuestion,
+
     num_answers: usize,
     answers: Vec<Answer>,
 }
@@ -81,10 +83,12 @@ pub(crate) async fn thread(
 ) -> Result<Template, (Status, String)> {
     let question = conn.question(id).await?;
     let answers = conn.answers(id).await?;
+    let owner = user.as_ref().map(|u| u.username == question.author).unwrap_or(false);
     Ok(Template::render(
         "thread",
         ThreadCtx {
             user: user.map(|u| u.username),
+            owner,
             question,
             num_answers: answers.len(),
             answers,

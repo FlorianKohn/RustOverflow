@@ -1,11 +1,9 @@
-use crate::db::models::{
-    Answer, DisplayQuestion, Login, NewQuestion, NewUser, Question, Tag, User,
-};
+use crate::db::models::{Answer, DisplayQuestion, Login, NewQuestion, NewUser, Question, Tag, User, NewAnswer};
 use crate::db::DbConn;
 use bcrypt::verify;
 use diesel::expression::count::count_star;
 use diesel::result::{DatabaseErrorKind, Error};
-use diesel::{BoolExpressionMethods, Connection, ExpressionMethods, QueryDsl, RunQueryDsl};
+use diesel::{BoolExpressionMethods, Connection, ExpressionMethods, QueryDsl, RunQueryDsl, insert_into};
 use rocket::http::Status;
 
 fn internal_error<E>(_: E) -> (Status, String) {
@@ -66,7 +64,6 @@ impl DbConn {
         password: String,
     ) -> Result<Login, (Status, String)> {
         use crate::db::schema::users::dsl::users;
-        use diesel::insert_into;
 
         let user = NewUser::create(username.clone(), password.clone())
             .map_err(|reason| (Status::BadRequest, reason))?;
@@ -206,7 +203,6 @@ impl DbConn {
     ) -> Result<i32, (Status, String)> {
         use crate::db::schema::chosen_tags::dsl::{chosen_tags, question, tag};
         use crate::db::schema::questions::dsl::{id, questions};
-        use diesel::insert_into;
 
         let new_question = NewQuestion {
             author,
@@ -266,5 +262,26 @@ impl DbConn {
         })
         .await
         .map_err(internal_error)
+    }
+
+    pub(crate) async fn new_answer(&self, author: i32, question: i32, text: String) -> Result<(), (Status, String)> {
+        use crate::db::schema::answers::dsl::{answers};
+
+        let new = NewAnswer{
+            author,
+            question,
+            text
+        };
+        self.run(move |c| {
+            insert_into(answers).values(new).execute(c)
+        })
+            .await
+            .map_err(|e: Error| match e {
+                Error::DatabaseError(DatabaseErrorKind::ForeignKeyViolation, _) => {
+                    (Status::BadRequest, "Invalid question id supplied".into())
+                }
+                e => internal_error(e),
+            })?;
+        Ok(())
     }
 }

@@ -82,11 +82,33 @@ pub(crate) async fn ask_question(
     question: Form<AskForm>,
     user: Login,
 ) -> Result<Redirect, (Status, String)> {
+    use crate::frontend::rocket_uri_macro_thread;
     let AskForm {
         title,
         question,
         tags,
     } = question.into_inner();
-    conn.new_question(user.id, title, question, tags).await?;
-    Ok(Redirect::to("/"))
+    let new_id = conn.new_question(user.id, title, question, tags).await?;
+    Ok(Redirect::to(uri!(thread(id = new_id))))
+}
+
+#[derive(Debug, FromForm)]
+pub(crate) struct AnswerForm {
+    question: i32,
+    text: String,
+}
+
+#[post("/answer", data = "<answer>")]
+pub(crate) async fn answer_question(
+    conn: DbConn,
+    answer: Form<AnswerForm>,
+    user: Login,
+) -> Result<Redirect, (Status, String)> {
+    use crate::frontend::rocket_uri_macro_thread;
+    let AnswerForm {
+        question,
+        text,
+    } = answer.into_inner();
+    conn.new_answer(user.id, question, text).await?;
+    Ok(Redirect::to(uri!(thread(id = question))))
 }
