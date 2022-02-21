@@ -40,6 +40,30 @@ fn datetime_helper(
     Ok(())
 }
 
+fn markdown_helper(
+    h: &Helper,
+    _: &Handlebars,
+    _: &Context,
+    _: &mut RenderContext,
+    out: &mut dyn Output,
+) -> HelperResult {
+    use serde_json::Value;
+    use comrak::{markdown_to_html_with_plugins, ComrakOptions, ComrakPlugins};
+    use comrak::plugins::syntect::SyntectAdapter;
+
+    let raw_value = h.param(0).unwrap().value();
+
+    let adapter = SyntectAdapter::new("Solarized (light)");
+    let options = ComrakOptions::default();
+    let mut plugins = ComrakPlugins::default();
+    plugins.render.codefence_syntax_highlighter = Some(&adapter);
+
+    if let Value::String(md)  = raw_value{
+        out.write(&markdown_to_html_with_plugins(md.as_str(), &options, &plugins))?;
+    }
+    Ok(())
+}
+
 #[launch]
 fn rocket() -> _ {
     rocket::build()
@@ -55,12 +79,18 @@ fn rocket() -> _ {
                 backend::logout,
                 backend::ask_question,
                 backend::answer_question,
+                backend::upvote_answer,
+                backend::downvote_answer,
+                backend::upvote_question,
+                backend::downvote_question,
+                backend::solve_question,
                 style
             ],
         )
         .attach(DbConn::fairing())
         .attach(Template::custom(|engines: &mut Engines| {
             engines.handlebars.register_helper("to_duration", Box::new(datetime_helper));
+            engines.handlebars.register_helper("as_markdown", Box::new(markdown_helper));
         }))
         .attach(SassSheet::fairing())
 }

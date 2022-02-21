@@ -15,6 +15,7 @@ serde = {version = "1.0.136", features = ["derive"]}
 serde_json = "1.0"
 chrono = {version="0.4.19", features = ["serde"]}
 chrono-humanize = "0.2.1"
+comrak = "0.12.1"
 
 [dependencies.rocket_sync_db_pools]
 version = "0.1.0-rc.1"

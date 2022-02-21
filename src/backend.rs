@@ -112,3 +112,61 @@ pub(crate) async fn answer_question(
     conn.new_answer(user.id, question, text).await?;
     Ok(Redirect::to(uri!(thread(id = question))))
 }
+
+#[get("/upvote/<qid>/<aid>")]
+pub(crate) async fn upvote_answer(
+    conn: DbConn,
+    _user: Login,
+    qid: i32,
+    aid: i32,
+) -> Result<Redirect, (Status, String)> {
+    use crate::frontend::rocket_uri_macro_thread;
+    conn.update_answer_score(aid, 1).await?;
+    Ok(Redirect::to(uri!(thread(id = qid))))
+}
+
+#[get("/downvote/<qid>/<aid>")]
+pub(crate) async fn downvote_answer(
+    conn: DbConn,
+    _user: Login,
+    qid: i32,
+    aid: i32,
+) -> Result<Redirect, (Status, String)> {
+    use crate::frontend::rocket_uri_macro_thread;
+    conn.update_answer_score(aid, -1).await?;
+    Ok(Redirect::to(uri!(thread(id = qid))))
+}
+
+#[get("/upvote/<qid>")]
+pub(crate) async fn upvote_question(
+    conn: DbConn,
+    _user: Login,
+    qid: i32,
+) -> Result<Redirect, (Status, String)> {
+    use crate::frontend::rocket_uri_macro_thread;
+    conn.update_question_score(qid, 1).await?;
+    Ok(Redirect::to(uri!(thread(id = qid))))
+}
+
+#[get("/downvote/<qid>")]
+pub(crate) async fn downvote_question(
+    conn: DbConn,
+    _user: Login,
+    qid: i32,
+) -> Result<Redirect, (Status, String)> {
+    use crate::frontend::rocket_uri_macro_thread;
+    conn.update_question_score(qid, -1).await?;
+    Ok(Redirect::to(uri!(thread(id = qid))))
+}
+
+#[get("/solved/<qid>/<aid>")]
+pub(crate) async fn solve_question(
+    conn: DbConn,
+    _user: Login,
+    qid: i32,
+    aid: i32,
+) -> Result<Redirect, (Status, String)> {
+    use crate::frontend::rocket_uri_macro_thread;
+    conn.mark_solved(aid).await?;
+    Ok(Redirect::to(uri!(thread(id = qid))))
+}

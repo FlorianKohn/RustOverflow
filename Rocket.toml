@@ -3,3 +3,8 @@ sass_sheet_path = "scss/main.scss"
 
 [global.databases]
 rust_overflow = { url = "rust_overflow.db3" }
+
+[staging]
+secret_key = "sc+Ph0j1Odphao00MHUGgo1X7TxF4Wg7HrowetTu8Oc="
+address = "0.0.0.0"
+port = 80
