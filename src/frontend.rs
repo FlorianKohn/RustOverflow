@@ -33,7 +33,7 @@ pub(crate) async fn index(user: Option<Login>, conn: DbConn) -> Result<Template,
             selected_tags: vec![],
 
             num_questions: questions.len(),
-            questions: questions,
+            questions,
         },
     ))
 }
@@ -76,11 +76,7 @@ struct ThreadCtx {
 }
 
 #[get("/q/<id>")]
-pub(crate) async fn thread(
-    user: Option<Login>,
-    conn: DbConn,
-    id: i32,
-) -> Result<Template, (Status, String)> {
+pub(crate) async fn thread(user: Option<Login>, conn: DbConn, id: i32) -> Result<Template, (Status, String)> {
     let question = conn.question(id).await?;
     let answers = conn.answers(id).await?;
     let owner = user.as_ref().map(|u| u.username == question.author).unwrap_or(false);

@@ -30,7 +30,7 @@
                             <label for="tags" class="form-label">Choose Tags</label>
                             <select class="selectpicker form-control" multiple data-live-search="true" title="tags" id="tags" name="tags">
                                 {{#each all_tags}}
-                                    <option value="{{this.id}}">{{this.name}}</option>
+                                    <option value="{{id}}">{{name}}</option>
                                 {{/each}}
                             </select>
 
@@ -45,22 +45,22 @@
     {{#each questions}}
         <div class="border-top border-dark row py-3 m-0">
             <div class="col-2 text-end d-flex flex-column justify-content-start align-items-end">
-                <div>{{this.score}} Votes</div>
-                {{#if this.answered}}
-                    <div class="border border-success rounded px-2 mt-1 text-light bg-success"><i class="bi-check-circle me-2"></i>{{this.num_answers}} answers</div>
+                <div>{{score}} Votes</div>
+                {{#if answered}}
+                    <div class="border border-success rounded px-2 mt-1 text-light bg-success"><i class="bi-check-circle me-2"></i>{{num_answers}} answers</div>
                 {{else}}
-                    <div class="border border-success rounded px-2 mt-1 text-success">{{this.num_answers}} answers</div>
+                    <div class="border border-success rounded px-2 mt-1 text-success">{{num_answers}} answers</div>
                 {{/if}}
             </div>
             <div class="col d-flex flex-column justify-content-start align-items-stretch">
-                <a class="text-decoration-none fs-4 mb-1" href="/q/{{this.id}}">{{this.title}}</a>
-                <div class="clamp">{{this.text}}</div>
+                <a class="text-decoration-none fs-4 mb-1" href="/q/{{id}}">{{title}}</a>
+                <div class="clamp">{{text}}</div>
                 <div class="d-flex flex-row justify-content-start flex-wrap mt-3 gap-2">
-                    {{#each this.tags}}
-                        <a class="btn btn-info text-light" href="/t/{{this.name}}">{{this.name}}</a>
+                    {{#each tags}}
+                        <a class="btn btn-info text-light" href="/t/{{name}}">{{name}}</a>
                     {{/each}}
                     <div class="ms-auto flex-shrink-0 d-flex flex-column justify-content-center">
-                        <div><strong>{{this.author}}</strong> asked <em>{{to_duration this.time}}</em></div>
+                        <div><strong>{{author}}</strong> asked <em>{{to_duration time}}</em></div>
                     </div>
                 </div>
             </div>

@@ -16,7 +16,7 @@
                 </p>
                 <div class="d-flex flex-row justify-content-end flex-wrap mt-auto gap-2">
                     {{#each question.tags}}
-                        <a class="btn btn-info text-light" href="/t/{{this.name}}">{{this.name}}</a>
+                        <a class="btn btn-info text-light" href="/t/{{name}}">{{name}}</a>
                     {{/each}}
                 </div>
             </div>
@@ -25,25 +25,25 @@
         {{#each answers}}
             <div class="border-top border-dark row py-3 m-0">
                 <div class="col-1 d-flex flex-column justify-content-start align-items-center text-muted">
-                    <a class="bi bi-caret-up-fill text-muted display-6" href="/upvote/{{../question.id}}/{{this.id}}"></a>
-                    <div class="fs-4">{{this.score}}</div>
-                    <a class="bi bi-caret-down-fill text-muted display-6" href="/downvote/{{../question.id}}/{{this.id}}"></a>
+                    <a class="bi bi-caret-up-fill text-muted display-6" href="/upvote/{{../question.id}}/{{id}}"></a>
+                    <div class="fs-4">{{score}}</div>
+                    <a class="bi bi-caret-down-fill text-muted display-6" href="/downvote/{{../question.id}}/{{id}}"></a>
                     {{#if ../owner}}
                         {{#if ../question.answered}}
                         {{else}}
-                            <a class="btn btn-outline-success" href="/solved/{{../question.id}}/{{this.id}}">Solved</a>
+                            <a class="btn btn-outline-success" href="/solved/{{../question.id}}/{{id}}">Solved</a>
                         {{/if}}
                     {{/if}}
-                    {{#if this.accepted}}
+                    {{#if accepted}}
                         <i class="bi-check-circle text-success display-6"></i>
                     {{/if}}
                 </div>
                 <div class="col d-flex flex-column justify-content-start align-items-stretch pe-lg-5">
                     <p>
-                        {{as_markdown this.text}}
+                        {{as_markdown ext}}
                     </p>
                     <div class="mt-auto text-end">
-                        <div><strong>{{this.author}}</strong> answerd <em>{{to_duration this.time}}</em></div>
+                        <div><strong>{{author}}</strong> answerd <em>{{to_duration time}}</em></div>
                     </div>
                 </div>
             </div>
