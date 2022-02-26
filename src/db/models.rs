@@ -10,7 +10,7 @@ pub(crate) struct User {
     pub(crate) password: String,
 }
 
-// A logged in user
+/// A logged in user
 #[derive(Queryable, Serialize, Deserialize, Debug, Clone)]
 pub(crate) struct Login {
     pub(crate) id: i32,
@@ -25,6 +25,7 @@ impl From<User> for Login {
     }
 }
 
+/// Represents a Tag in the Database
 #[derive(Queryable, Serialize, Debug, Clone)]
 pub(crate) struct Tag {
     pub(crate) id: i32,
@@ -32,6 +33,8 @@ pub(crate) struct Tag {
     pub(crate) description: String,
 }
 
+/// Represents a Question in the Database
+/// The author is replaced with the username of the author
 #[derive(Queryable, Serialize, Debug, Clone)]
 pub(crate) struct Question {
     pub(crate) id: i32,
@@ -42,6 +45,8 @@ pub(crate) struct Question {
     pub(crate) text: String,
 }
 
+/// A collection of data concerning a question.
+/// Suitable to generate HTMl for a question
 #[derive(Serialize, Debug, Clone)]
 pub(crate) struct DisplayQuestion {
     pub(crate) id: i32,
@@ -55,6 +60,8 @@ pub(crate) struct DisplayQuestion {
     pub(crate) answered: bool,
 }
 
+/// Represents an Answer in the Database
+/// The author is replaced with the username of the author
 #[derive(Queryable, Serialize, Debug, Clone)]
 pub(crate) struct Answer {
     pub(crate) id: i32,
@@ -66,6 +73,8 @@ pub(crate) struct Answer {
     pub(crate) text: String,
 }
 
+/// Represents the data needed to create a new User
+/// I.e. it omits all fields of the `ùsers` table that are filled in with defaults.
 #[derive(Insertable, Debug, Clone)]
 #[table_name = "users"]
 pub(crate) struct NewUser {
@@ -87,6 +96,8 @@ impl NewUser {
     }
 }
 
+/// Represents the data needed to create a new Question
+/// I.e. it omits all fields of the `questions` table that are filled in with defaults.
 #[derive(Insertable, Debug, Clone)]
 #[table_name = "questions"]
 pub(crate) struct NewQuestion {
@@ -95,6 +106,8 @@ pub(crate) struct NewQuestion {
     pub(crate) text: String,
 }
 
+/// Represents the data needed to create a new Answer
+/// I.e. it omits all fields of the `answers` table that are filled in with defaults.
 #[derive(Insertable, Debug, Clone)]
 #[table_name = "answers"]
 pub(crate) struct NewAnswer {

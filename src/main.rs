@@ -16,11 +16,13 @@ use rocket_dyn_templates::handlebars::{
 use rocket_dyn_templates::{Template, Engines};
 use rocket_sass_fairing::SassSheet;
 
+/// A route for the bootstrap css files compiled from its source.
 #[get("/bootstrap.css")]
 async fn style(sheet: &SassSheet) -> &SassSheet {
     sheet
 }
 
+/// Converts a creation date into a string displaying the time passed since then.
 fn datetime_helper(
     h: &Helper,
     _: &Handlebars,
@@ -40,6 +42,7 @@ fn datetime_helper(
     Ok(())
 }
 
+/// Parses the markdown in a given string and transforms it into corresponding HTML code.
 fn markdown_helper(
     h: &Helper,
     _: &Handlebars,

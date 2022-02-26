@@ -12,6 +12,7 @@ fn internal_error<E>(_: E) -> (Status, String) {
 
 // Helper functions
 impl DbConn {
+    /// Converts multiple questions into a DisplayQuestions
     async fn to_display_questions(
         &self,
         questions: Vec<Question>,
@@ -24,6 +25,7 @@ impl DbConn {
         Ok(res)
     }
 
+    /// Annotate a Question with the data needed for displaying it, transforming it into a DisplayQuestion.
     async fn to_display_question(&self, q: Question) -> Result<DisplayQuestion, (Status, String)> {
         Ok(DisplayQuestion {
             id: q.id,
@@ -41,6 +43,7 @@ impl DbConn {
 
 // pub(crate) interface
 impl DbConn {
+    /// Verify the credentials of the given user and return a logged in user on success.
     pub(crate) async fn login(
         &self,
         login_name: String,
@@ -58,6 +61,7 @@ impl DbConn {
             .ok_or((Status::Unauthorized, "wrong password".into()))
     }
 
+    /// Create a new user and return a logged in user.
     pub(crate) async fn register(
         &self,
         username: String,
@@ -82,6 +86,7 @@ impl DbConn {
         self.login(username, password).await
     }
 
+    /// Return the number of answers a question has
     pub(crate) async fn num_answers(&self, q_id: i32) -> Result<i64, (Status, String)> {
         use crate::db::schema::answers::dsl::*;
         self.run(move |c| {
@@ -94,6 +99,7 @@ impl DbConn {
         .map_err(internal_error)
     }
 
+    /// Return whether a question was answered
     pub(crate) async fn answered(&self, q_id: i32) -> Result<bool, (Status, String)> {
         use crate::db::schema::answers::dsl::*;
         let res = self
@@ -112,6 +118,7 @@ impl DbConn {
         }
     }
 
+    /// Return all tags of a question
     pub(crate) async fn tags(&self, q_id: i32) -> Result<Vec<Tag>, (Status, String)> {
         use crate::db::schema::chosen_tags::dsl::{chosen_tags, question};
         use crate::db::schema::tags::dsl::{description, id, name, tags};
@@ -126,6 +133,7 @@ impl DbConn {
         .map_err(internal_error)
     }
 
+    /// Return all tags in the database
     pub(crate) async fn all_tags(&self) -> Result<Vec<Tag>, (Status, String)> {
         use crate::db::schema::tags::dsl::tags;
         self.run(move |c| tags.load(c))
@@ -133,6 +141,7 @@ impl DbConn {
             .map_err(internal_error)
     }
 
+    /// Return all tags with a name in the given vector of names.
     pub(crate) async fn tags_with_names(
         &self,
         targets: Vec<String>,
@@ -150,6 +159,7 @@ impl DbConn {
         }
     }
 
+    /// Select all questions in the database and oder them by newest first
     pub(crate) async fn newest_questions(&self) -> Result<Vec<DisplayQuestion>, (Status, String)> {
         use crate::db::schema::questions::dsl::*;
         use crate::db::schema::users::dsl::{username, users};
@@ -168,6 +178,7 @@ impl DbConn {
         self.to_display_questions(new_questions).await
     }
 
+    /// Select all question that have a tag in the specified target vector.
     pub(crate) async fn questions_with_tag(
         &self,
         target_tags: Vec<String>,
@@ -194,6 +205,7 @@ impl DbConn {
         self.to_display_questions(tagged_questions).await
     }
 
+    /// Add a new question to the database and return the id of it.
     pub(crate) async fn new_question(
         &self,
         author: i32,
@@ -210,6 +222,7 @@ impl DbConn {
             text,
         };
         // Insert question into db and retrieve id
+        // A transaction is used to guarantee atomicity of the operations.
         self.run(move |c| {
             c.transaction::<_, Error, _>(|| {
                 insert_into(questions).values(&new_question).execute(c)?;
@@ -231,6 +244,7 @@ impl DbConn {
         })
     }
 
+    /// Select a question by id
     pub(crate) async fn question(&self, qid: i32) -> Result<DisplayQuestion, (Status, String)> {
         use crate::db::schema::questions::dsl::*;
         use crate::db::schema::users::dsl::{username, users};
@@ -250,6 +264,7 @@ impl DbConn {
         self.to_display_question(question).await
     }
 
+    /// Select all answers of a given question
     pub(crate) async fn answers(&self, qid: i32) -> Result<Vec<Answer>, (Status, String)> {
         use crate::db::schema::answers::dsl::*;
         use crate::db::schema::users::dsl::{username, users};
@@ -265,6 +280,7 @@ impl DbConn {
         .map_err(internal_error)
     }
 
+    /// Add a new answer to the database.
     pub(crate) async fn new_answer(&self, author: i32, question: i32, text: String) -> Result<(), (Status, String)> {
         use crate::db::schema::answers::dsl::{answers};
 
@@ -286,6 +302,7 @@ impl DbConn {
         Ok(())
     }
 
+    /// Update the score of the question by the given difference.
     pub(crate) async fn update_question_score(&self, q_id: i32, diff: i32) -> Result<(), (Status, String)> {
         use crate::db::schema::questions::dsl::{questions, id, score};
 
@@ -302,6 +319,7 @@ impl DbConn {
         Ok(())
     }
 
+    /// Update the score of the answer by the given difference.
     pub(crate) async fn update_answer_score(&self, a_id: i32, diff: i32) -> Result<(), (Status, String)> {
         use crate::db::schema::answers::dsl::{answers, id, score};
 
@@ -318,6 +336,7 @@ impl DbConn {
         Ok(())
     }
 
+    /// Mark an answer as solved.
     pub(crate) async fn mark_solved(&self, a_id: i32) -> Result<(), (Status, String)> {
         use crate::db::schema::answers::dsl::{answers, id, accepted};
 
