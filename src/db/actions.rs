@@ -51,7 +51,7 @@ impl DbConn {
     ) -> Result<Login, (Status, String)> {
         use crate::db::schema::users::dsl::*;
         let db_user: User = self
-            .run(|c| users.filter(username.eq(login_name)).first::<User>(c))
+            .run(|connection| users.filter(username.eq(login_name)).first::<User>(connection))
             .await
             .map_err(|e| (Status::BadRequest, e.to_string()))?;
         let verified = verify(login_pw, &db_user.password).map_err(internal_error)?;
@@ -73,7 +73,7 @@ impl DbConn {
             .map_err(|reason| (Status::BadRequest, reason))?;
 
         // Insert User into db
-        self.run(move |c| insert_into(users).values(&user).execute(c))
+        self.run(move |connection| insert_into(users).values(&user).execute(connection))
             .await
             .map_err(|e: Error| match e {
                 Error::DatabaseError(DatabaseErrorKind::UniqueViolation, _) => {
@@ -89,11 +89,11 @@ impl DbConn {
     /// Return the number of answers a question has
     pub(crate) async fn num_answers(&self, q_id: i32) -> Result<i64, (Status, String)> {
         use crate::db::schema::answers::dsl::*;
-        self.run(move |c| {
+        self.run(move |connection| {
             answers
                 .filter(question.eq(q_id))
                 .select(count_star())
-                .first::<i64>(c)
+                .first::<i64>(connection)
         })
         .await
         .map_err(internal_error)
@@ -103,11 +103,11 @@ impl DbConn {
     pub(crate) async fn answered(&self, q_id: i32) -> Result<bool, (Status, String)> {
         use crate::db::schema::answers::dsl::*;
         let res = self
-            .run(move |c| {
+            .run(move |connection| {
                 answers
                     .filter(question.eq(q_id).and(accepted.eq(true)))
                     .select(id)
-                    .first::<i32>(c)
+                    .first::<i32>(connection)
             })
             .await;
 
@@ -122,12 +122,12 @@ impl DbConn {
     pub(crate) async fn tags(&self, q_id: i32) -> Result<Vec<Tag>, (Status, String)> {
         use crate::db::schema::chosen_tags::dsl::{chosen_tags, question};
         use crate::db::schema::tags::dsl::{description, id, name, tags};
-        self.run(move |c| {
+        self.run(move |connection| {
             chosen_tags
                 .filter(question.eq(q_id))
                 .inner_join(tags)
                 .select((id, name, description))
-                .load::<Tag>(c)
+                .load::<Tag>(connection)
         })
         .await
         .map_err(internal_error)
@@ -136,7 +136,7 @@ impl DbConn {
     /// Return all tags in the database
     pub(crate) async fn all_tags(&self) -> Result<Vec<Tag>, (Status, String)> {
         use crate::db::schema::tags::dsl::tags;
-        self.run(move |c| tags.load(c))
+        self.run(move |connection| tags.load(connection))
             .await
             .map_err(internal_error)
     }
@@ -149,7 +149,7 @@ impl DbConn {
         use crate::db::schema::tags::dsl::{name, tags};
         let target_len = targets.len();
         let res = self
-            .run(move |c| tags.filter(name.eq_any(targets)).load::<Tag>(c))
+            .run(move |connection| tags.filter(name.eq_any(targets)).load::<Tag>(connection))
             .await
             .map_err(internal_error)?;
         if res.len() != target_len {
@@ -165,12 +165,12 @@ impl DbConn {
         use crate::db::schema::users::dsl::{username, users};
 
         let new_questions: Vec<Question> = self
-            .run(move |c| {
+            .run(move |connection| {
                 questions
                     .inner_join(users)
                     .order_by(time.desc())
                     .select((id, username, time, score, title, text))
-                    .load::<Question>(c)
+                    .load::<Question>(connection)
             })
             .await
             .map_err(internal_error)?;
@@ -189,7 +189,7 @@ impl DbConn {
         use crate::db::schema::users::dsl::{username, users};
 
         let tagged_questions: Vec<Question> = self
-            .run(move |c| {
+            .run(move |connection| {
                 questions
                     .inner_join(users)
                     .inner_join(chosen_tags.inner_join(tags))
@@ -197,7 +197,7 @@ impl DbConn {
                     .order_by(time.desc())
                     .select((id, username, time, score, title, text))
                     .distinct()
-                    .load::<Question>(c)
+                    .load::<Question>(connection)
             })
             .await
             .map_err(internal_error)?;
@@ -223,14 +223,14 @@ impl DbConn {
         };
         // Insert question into db and retrieve id
         // A transaction is used to guarantee atomicity of the operations.
-        self.run(move |c| {
-            c.transaction::<_, Error, _>(|| {
-                insert_into(questions).values(&new_question).execute(c)?;
-                let new_id = questions.order_by(id.desc()).select(id).first(c)?;
+        self.run(move |connection| {
+            connection.transaction::<_, Error, _>(|| {
+                insert_into(questions).values(&new_question).execute(connection)?;
+                let new_id = questions.order_by(id.desc()).select(id).first(connection)?;
                 for t in tags.iter() {
                     insert_into(chosen_tags)
                         .values((question.eq(new_id), tag.eq(t)))
-                        .execute(c)?;
+                        .execute(connection)?;
                 }
                 Ok(new_id)
             })
@@ -249,12 +249,12 @@ impl DbConn {
         use crate::db::schema::questions::dsl::*;
         use crate::db::schema::users::dsl::{username, users};
         let question = self
-            .run(move |c| {
+            .run(move |connection| {
                 questions
                     .inner_join(users)
                     .filter(id.eq(qid))
                     .select((id, username, time, score, title, text))
-                    .first(c)
+                    .first(connection)
             })
             .await
             .map_err(|e: Error| match e {
@@ -268,13 +268,13 @@ impl DbConn {
     pub(crate) async fn answers(&self, qid: i32) -> Result<Vec<Answer>, (Status, String)> {
         use crate::db::schema::answers::dsl::*;
         use crate::db::schema::users::dsl::{username, users};
-        self.run(move |c| {
+        self.run(move |connection| {
             answers
                 .inner_join(users)
                 .filter(question.eq(qid))
                 .order_by(score.desc())
                 .select((id, username, question, time, score, accepted, text))
-                .load(c)
+                .load(connection)
         })
         .await
         .map_err(internal_error)
@@ -289,8 +289,8 @@ impl DbConn {
             question,
             text
         };
-        self.run(move |c| {
-            insert_into(answers).values(new).execute(c)
+        self.run(move |connection| {
+            insert_into(answers).values(new).execute(connection)
         })
             .await
             .map_err(|e: Error| match e {
@@ -306,8 +306,8 @@ impl DbConn {
     pub(crate) async fn update_question_score(&self, q_id: i32, diff: i32) -> Result<(), (Status, String)> {
         use crate::db::schema::questions::dsl::{questions, id, score};
 
-        self.run(move |c| {
-            update(questions.filter(id.eq(q_id))).set(score.eq(score + diff)).execute(c)
+        self.run(move |connection| {
+            update(questions.filter(id.eq(q_id))).set(score.eq(score + diff)).execute(connection)
         })
             .await
             .map_err(|e: Error| match e {
@@ -323,8 +323,8 @@ impl DbConn {
     pub(crate) async fn update_answer_score(&self, a_id: i32, diff: i32) -> Result<(), (Status, String)> {
         use crate::db::schema::answers::dsl::{answers, id, score};
 
-        self.run(move |c| {
-            update(answers.filter(id.eq(a_id))).set(score.eq(score + diff)).execute(c)
+        self.run(move |connection| {
+            update(answers.filter(id.eq(a_id))).set(score.eq(score + diff)).execute(connection)
         })
             .await
             .map_err(|e: Error| match e {
@@ -340,8 +340,8 @@ impl DbConn {
     pub(crate) async fn mark_solved(&self, a_id: i32) -> Result<(), (Status, String)> {
         use crate::db::schema::answers::dsl::{answers, id, accepted};
 
-        self.run(move |c| {
-            update(answers.filter(id.eq(a_id))).set(accepted.eq(true)).execute(c)
+        self.run(move |connection| {
+            update(answers.filter(id.eq(a_id))).set(accepted.eq(true)).execute(connection)
         })
             .await
             .map_err(|e: Error| match e {
