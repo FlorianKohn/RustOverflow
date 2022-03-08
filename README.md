@@ -1,5 +1,8 @@
-# RustOverflow
+<p align="center" width="100%">
+    <img width="40%" src="https://raw.githubusercontent.com/FlorianKohn/RustOverflow/main/static/logo.svg">
+</p>
 
+# RustOverflow
 A StackOverflow mockup implemented in Rust using: Diesel, Rocket and Handlebars templates.
 
 The main purpose of the project is to serve as an example for the Rocket ecosystem.
