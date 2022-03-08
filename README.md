@@ -15,7 +15,7 @@ To build the project manually, first install the diesel cli using:
 
 `cargo install diesel_cli --no-default-features --features sqlite`
 
-_Note_: Make sure that the SQLite is installed on your system.
+_Note_: Make sure that SQLite is installed on your system.
 
 Then create a database using:
 

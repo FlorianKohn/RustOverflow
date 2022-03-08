@@ -1,7 +1,7 @@
 FROM rust:latest as builder
 
 RUN git clone https://github.com/FlorianKohn/RustOverflow.git
-WORKDIR RustOverflow
+WORKDIR /RustOverflow
 RUN cargo install --path .
 
 FROM debian:bullseye-slim
