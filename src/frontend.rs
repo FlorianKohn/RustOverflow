@@ -44,7 +44,7 @@ pub(crate) async fn tagged_question(
     conn: DbConn,
     tags: String,
 ) -> Result<Template, (Status, String)> {
-    let tag_names: Vec<String> = tags.split("+").map(String::from).collect();
+    let tag_names: Vec<String> = tags.split('+').map(String::from).collect();
     let tags = conn.tags_with_names(tag_names.clone()).await?;
     let questions = conn.questions_with_tag(tag_names.clone()).await?;
     Ok(Template::render(
@@ -59,7 +59,7 @@ pub(crate) async fn tagged_question(
             selected_tags: tags,
 
             num_questions: questions.len(),
-            questions: questions,
+            questions,
         },
     ))
 }
@@ -76,10 +76,17 @@ struct ThreadCtx {
 }
 
 #[get("/q/<id>")]
-pub(crate) async fn thread(user: Option<Login>, conn: DbConn, id: i32) -> Result<Template, (Status, String)> {
+pub(crate) async fn thread(
+    user: Option<Login>,
+    conn: DbConn,
+    id: i32,
+) -> Result<Template, (Status, String)> {
     let question = conn.question(id).await?;
     let answers = conn.answers(id).await?;
-    let owner = user.as_ref().map(|u| u.username == question.author).unwrap_or(false);
+    let owner = user
+        .as_ref()
+        .map(|u| u.username == question.author)
+        .unwrap_or(false);
     Ok(Template::render(
         "thread",
         ThreadCtx {

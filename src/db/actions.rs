@@ -1,9 +1,14 @@
-use crate::db::models::{Answer, DisplayQuestion, Login, NewQuestion, NewUser, Question, Tag, User, NewAnswer};
+use crate::db::models::{
+    Answer, DisplayQuestion, Login, NewAnswer, NewQuestion, NewUser, Question, Tag, User,
+};
 use crate::db::DbConn;
 use bcrypt::verify;
 use diesel::expression::count::count_star;
 use diesel::result::{DatabaseErrorKind, Error};
-use diesel::{BoolExpressionMethods, Connection, ExpressionMethods, QueryDsl, RunQueryDsl, insert_into, update};
+use diesel::{
+    insert_into, update, BoolExpressionMethods, Connection, ExpressionMethods, QueryDsl,
+    RunQueryDsl,
+};
 use rocket::http::Status;
 
 fn internal_error<E>(_: E) -> (Status, String) {
@@ -51,7 +56,11 @@ impl DbConn {
     ) -> Result<Login, (Status, String)> {
         use crate::db::schema::users::dsl::*;
         let db_user: User = self
-            .run(|connection| users.filter(username.eq(login_name)).first::<User>(connection))
+            .run(|connection| {
+                users
+                    .filter(username.eq(login_name))
+                    .first::<User>(connection)
+            })
             .await
             .map_err(|e| (Status::BadRequest, e.to_string()))?;
         let verified = verify(login_pw, &db_user.password).map_err(internal_error)?;
@@ -225,7 +234,9 @@ impl DbConn {
         // A transaction is used to guarantee atomicity of the operations.
         self.run(move |connection| {
             connection.transaction::<_, Error, _>(|| {
-                insert_into(questions).values(&new_question).execute(connection)?;
+                insert_into(questions)
+                    .values(&new_question)
+                    .execute(connection)?;
                 let new_id = questions.order_by(id.desc()).select(id).first(connection)?;
                 for t in tags.iter() {
                     insert_into(chosen_tags)
@@ -281,17 +292,20 @@ impl DbConn {
     }
 
     /// Add a new answer to the database.
-    pub(crate) async fn new_answer(&self, author: i32, question: i32, text: String) -> Result<(), (Status, String)> {
-        use crate::db::schema::answers::dsl::{answers};
+    pub(crate) async fn new_answer(
+        &self,
+        author: i32,
+        question: i32,
+        text: String,
+    ) -> Result<(), (Status, String)> {
+        use crate::db::schema::answers::dsl::answers;
 
-        let new = NewAnswer{
+        let new = NewAnswer {
             author,
             question,
-            text
+            text,
         };
-        self.run(move |connection| {
-            insert_into(answers).values(new).execute(connection)
-        })
+        self.run(move |connection| insert_into(answers).values(new).execute(connection))
             .await
             .map_err(|e: Error| match e {
                 Error::DatabaseError(DatabaseErrorKind::ForeignKeyViolation, _) => {
@@ -303,53 +317,67 @@ impl DbConn {
     }
 
     /// Update the score of the question by the given difference.
-    pub(crate) async fn update_question_score(&self, q_id: i32, diff: i32) -> Result<(), (Status, String)> {
-        use crate::db::schema::questions::dsl::{questions, id, score};
+    pub(crate) async fn update_question_score(
+        &self,
+        q_id: i32,
+        diff: i32,
+    ) -> Result<(), (Status, String)> {
+        use crate::db::schema::questions::dsl::{id, questions, score};
 
         self.run(move |connection| {
-            update(questions.filter(id.eq(q_id))).set(score.eq(score + diff)).execute(connection)
+            update(questions.filter(id.eq(q_id)))
+                .set(score.eq(score + diff))
+                .execute(connection)
         })
-            .await
-            .map_err(|e: Error| match e {
-                Error::DatabaseError(DatabaseErrorKind::ForeignKeyViolation, _) => {
-                    (Status::BadRequest, "Invalid question id supplied".into())
-                }
-                e => internal_error(e),
-            })?;
+        .await
+        .map_err(|e: Error| match e {
+            Error::DatabaseError(DatabaseErrorKind::ForeignKeyViolation, _) => {
+                (Status::BadRequest, "Invalid question id supplied".into())
+            }
+            e => internal_error(e),
+        })?;
         Ok(())
     }
 
     /// Update the score of the answer by the given difference.
-    pub(crate) async fn update_answer_score(&self, a_id: i32, diff: i32) -> Result<(), (Status, String)> {
+    pub(crate) async fn update_answer_score(
+        &self,
+        a_id: i32,
+        diff: i32,
+    ) -> Result<(), (Status, String)> {
         use crate::db::schema::answers::dsl::{answers, id, score};
 
         self.run(move |connection| {
-            update(answers.filter(id.eq(a_id))).set(score.eq(score + diff)).execute(connection)
+            update(answers.filter(id.eq(a_id)))
+                .set(score.eq(score + diff))
+                .execute(connection)
         })
-            .await
-            .map_err(|e: Error| match e {
-                Error::DatabaseError(DatabaseErrorKind::ForeignKeyViolation, _) => {
-                    (Status::BadRequest, "Invalid answer id supplied".into())
-                }
-                e => internal_error(e),
-            })?;
+        .await
+        .map_err(|e: Error| match e {
+            Error::DatabaseError(DatabaseErrorKind::ForeignKeyViolation, _) => {
+                (Status::BadRequest, "Invalid answer id supplied".into())
+            }
+            e => internal_error(e),
+        })?;
         Ok(())
     }
 
     /// Mark an answer as solved.
     pub(crate) async fn mark_solved(&self, a_id: i32) -> Result<(), (Status, String)> {
-        use crate::db::schema::answers::dsl::{answers, id, accepted};
+        use crate::db::schema::answers::dsl::{accepted, answers, id};
 
         self.run(move |connection| {
-            update(answers.filter(id.eq(a_id))).set(accepted.eq(true)).execute(connection)
+            update(answers.filter(id.eq(a_id)))
+                .set(accepted.eq(true))
+                .execute(connection)
         })
-            .await
-            .map_err(|e: Error| match e {
-                Error::DatabaseError(DatabaseErrorKind::ForeignKeyViolation, _) => {
-                    (Status::BadRequest, "Invalid answer id supplied".into())
-                }
-                e => internal_error(e),
-            })?;
+        .await
+        .map_err(|e: Error| match e {
+            Error::DatabaseError(DatabaseErrorKind::ForeignKeyViolation, _) => {
+                (Status::BadRequest, "Invalid answer id supplied".into())
+            }
+            e => internal_error(e),
+        })?;
         Ok(())
     }
 }

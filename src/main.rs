@@ -13,7 +13,7 @@ use rocket::fs::{relative, FileServer};
 use rocket_dyn_templates::handlebars::{
     Context, Handlebars, Helper, HelperResult, Output, RenderContext,
 };
-use rocket_dyn_templates::{Template, Engines};
+use rocket_dyn_templates::{Engines, Template};
 use rocket_sass_fairing::SassSheet;
 
 /// A route for the bootstrap css files compiled from its source.
@@ -50,9 +50,9 @@ fn markdown_helper(
     _: &mut RenderContext,
     out: &mut dyn Output,
 ) -> HelperResult {
-    use serde_json::Value;
-    use comrak::{markdown_to_html_with_plugins, ComrakOptions, ComrakPlugins};
     use comrak::plugins::syntect::SyntectAdapter;
+    use comrak::{markdown_to_html_with_plugins, ComrakOptions, ComrakPlugins};
+    use serde_json::Value;
 
     let raw_value = h.param(0).unwrap().value();
 
@@ -61,8 +61,12 @@ fn markdown_helper(
     let mut plugins = ComrakPlugins::default();
     plugins.render.codefence_syntax_highlighter = Some(&adapter);
 
-    if let Value::String(md)  = raw_value{
-        out.write(&markdown_to_html_with_plugins(md.as_str(), &options, &plugins))?;
+    if let Value::String(md) = raw_value {
+        out.write(&markdown_to_html_with_plugins(
+            md.as_str(),
+            &options,
+            &plugins,
+        ))?;
     }
     Ok(())
 }
@@ -92,8 +96,12 @@ fn rocket() -> _ {
         )
         .attach(DbConn::fairing())
         .attach(Template::custom(|engines: &mut Engines| {
-            engines.handlebars.register_helper("to_duration", Box::new(datetime_helper));
-            engines.handlebars.register_helper("as_markdown", Box::new(markdown_helper));
+            engines
+                .handlebars
+                .register_helper("to_duration", Box::new(datetime_helper));
+            engines
+                .handlebars
+                .register_helper("as_markdown", Box::new(markdown_helper));
         }))
         .attach(SassSheet::fairing())
 }

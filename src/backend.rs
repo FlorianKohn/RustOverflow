@@ -41,9 +41,9 @@ pub(crate) async fn login(
 
 #[get("/logout")]
 pub(crate) async fn logout(cookies: &CookieJar<'_>) -> Redirect {
-    cookies
-        .get_private("User")
-        .map(|c| cookies.remove_private(c));
+    if let Some(user_cookie) = cookies.get_private("User") {
+        cookies.remove_private(user_cookie);
+    }
     Redirect::to("/")
 }
 
@@ -105,10 +105,7 @@ pub(crate) async fn answer_question(
     user: Login,
 ) -> Result<Redirect, (Status, String)> {
     use crate::frontend::rocket_uri_macro_thread;
-    let AnswerForm {
-        question,
-        text,
-    } = answer.into_inner();
+    let AnswerForm { question, text } = answer.into_inner();
     conn.new_answer(user.id, question, text).await?;
     Ok(Redirect::to(uri!(thread(id = question))))
 }
